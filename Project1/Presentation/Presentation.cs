@@ -1,10 +1,12 @@
+using System.Net.Cache;
+
 class Presentation
 {
-     public static void MainMenu()
-     {
+    public static void MainMenu()
+    {
         System.Console.WriteLine("Welcome to the Competition Registration Site!");
         bool keepGoing = true;
-        while(keepGoing)
+        while (keepGoing)
         {
             System.Console.WriteLine("Please pick an option to proceed:");
             System.Console.WriteLine("*********************************");
@@ -13,14 +15,34 @@ class Presentation
             System.Console.WriteLine("[3] Administrator Login");
             System.Console.WriteLine("[0] Quit");
             System.Console.WriteLine("*********************************");
-
             int input = int.Parse(Console.ReadLine() ?? "0");
             input = ValidateCmd(input, 3);
-
-            keepGoing = DecideNextOption(input);
+            switch (input)
+            {
+                case 1:
+                    Gymnast gymnast = CreateGymnast();
+                    GymnastOptionsMenu(gymnast);
+                    keepGoing = false;
+                    break;
+                case 2:
+                    gymnast = GymnastLogin();
+                    GymnastOptionsMenu(gymnast);
+                    keepGoing = false;
+                    break;
+                case 3:
+                    AdminLogin();
+                    keepGoing = false;
+                    break;
+                case 0:
+                    System.Environment.Exit(0);
+                    break;
+                default:
+                    System.Console.WriteLine("Invalid option selected. Please select from options 0-3");
+                    break;
+            }
         }
-     }
-    public static void CreateGymnast()
+    }
+    public static Gymnast CreateGymnast()
     {
         string username;
         string fname;
@@ -34,8 +56,10 @@ class Presentation
         lname = Console.ReadLine();
         System.Console.WriteLine("Please provide gymnast's DOB:");
         dob = DateTime.Parse(Console.ReadLine());
-
         Gymnast newGymnast = new(username, fname, lname, dob);
+        SQLStorageRepo repo = new();
+        repo.StoreGymnast(newGymnast);
+        return newGymnast;
     }
     public static Gymnast GymnastLogin()
     {
@@ -43,77 +67,130 @@ class Presentation
         Gymnast loginGymnast = new();
         System.Console.WriteLine("Please enter your user name:");
         username = Console.ReadLine();
-        //here - call db to find user to log in
+        SQLStorageRepo repo = new();
+        loginGymnast = repo.LoginGymnast(username);
         return loginGymnast;
     }
-        public static void AdminLogin()
+    public static void AdminLogin()
     {
         string password;
         System.Console.WriteLine("Please enter your admin password:");
         password = Console.ReadLine();
+        if (password == "1234")
+        {
+            AdminMenu();
+        }
         //need to create a loop validating correct password entered
-        AdminMenu();
-        
     }
-     public static void AdminMenu()
+    public static void AdminMenu()
     {
         System.Console.WriteLine("Welcome to the Competition Registration Site!");
         bool keepGoing = true;
-        while(keepGoing)
+        while (keepGoing)
         {
             System.Console.WriteLine("Please pick an option to proceed:");
             System.Console.WriteLine("*********************************");
             System.Console.WriteLine("[1] View Competitions");
-            System.Console.WriteLine("[2] View active Gymnasts");
-            System.Console.WriteLine("[3] Register Gymnast for Competition");
-            System.Console.WriteLine("[4] View Gymnasts Registered for Competition");
+            System.Console.WriteLine("[2] Create New Competition");
             System.Console.WriteLine("[0] Quit");
             System.Console.WriteLine("*********************************");
-
             int input = int.Parse(Console.ReadLine() ?? "0");
-            input = ValidateCmd(input, 4);
-
-            keepGoing = DecideNextOption(input);
+            input = ValidateCmd(input, 2);
+            SQLStorageRepo repo = new();
+            switch (input)
+            {
+                case 1:
+                    List<Competition>competitions = repo.GetAllCompetitions();
+                    PrintCompetitions(competitions);
+                    break;
+                case 2:
+                    CreateCompetition();
+                    break;
+                case 0:
+                    System.Environment.Exit(0);
+                    break;
+                default:
+                    System.Console.WriteLine("Invalid option selected. Please select from options 0-5");
+                    break;
+            }
         }
     }
-    public static bool DecideNextOption(int input)
+    public static void CreateCompetition()
     {
-        switch (input)
+        string competitionname;
+        DateTime competitionStartDate;
+        DateTime competitionEndDate;
+        string competitionlocation;
+        Guid CompetitionId;
+        System.Console.WriteLine("Please provide the name of the competition");
+        competitionname = Console.ReadLine();
+        System.Console.WriteLine("Please provide the competition Start Date:");
+        competitionStartDate = DateTime.Parse(Console.ReadLine());
+        System.Console.WriteLine("Please provide the competition End Date:");
+        competitionEndDate = DateTime.Parse(Console.ReadLine());
+        System.Console.WriteLine("Please provide the location of the competition:");
+        competitionlocation = Console.ReadLine();
+        Competition newCompetition = new(competitionname, competitionStartDate, competitionEndDate, competitionlocation);
+        SQLStorageRepo repo = new();
+        repo.StoreCompetition(newCompetition);
+    }
+    public static void GymnastOptionsMenu(Gymnast gymnast)
+    {
         {
-            case 1:
+            System.Console.WriteLine($"Welcome {gymnast.Fname}!");
+            bool keepGoing = true;
+            while (keepGoing)
             {
-                RetrievingAvailableCompetitions();
-                break;
-            }
-            case 2:
-            {
-                RetrievingActiveGymnasts();
-                break;
-            }
-            case 3:
-            {
-                RegisterGymnast();
-                break;
-            }
-            case 4:
-            {
-                ViewRegistrations();
-                break;
-            }
-            case 0:
-            default:
-            {
-                return false;
+                System.Console.WriteLine("Please pick an option to proceed:");
+                System.Console.WriteLine("*********************************");
+                System.Console.WriteLine("[1] View Competitions Currently Registered In");
+                System.Console.WriteLine("[2] Register for Competition");
+                System.Console.WriteLine("[0] Quit");
+                System.Console.WriteLine("*********************************");
+                SQLStorageRepo repo = new();
+                int input = int.Parse(Console.ReadLine() ?? "0");
+                input = ValidateCmd(input, 2);
+                switch (input)
+                {
+                    case 1:
+                        List<Competition> competitions = repo.GetCompetitions(gymnast);
+                        PrintCompetitions(competitions);
+                        break;
+                    case 2:
+                        Register(gymnast);
+                        break;
+                    case 0:
+                        System.Environment.Exit(0);
+                        break;
+                    default:
+                        System.Console.WriteLine("Invalid option selected. Please select from options 0-3");
+                        break;
+                }
             }
         }
-        return true;
     }
-    private static void RetrievingAvailableCompetitions()
+    public static void PrintCompetitions(List<Competition> competitions)
     {
-        List<Competition> competition = 
+        foreach (Competition competition in competitions)
+        {
+            System.Console.WriteLine(competition.ToString());
+        }
+        Console.ReadLine();
     }
-
-    
+    public static void Register(Gymnast gymnast) // sign up for a new competition 
+    {
+        int compIndex = 0;
+        SQLStorageRepo repo = new();
+        Console.WriteLine("Please select which competition you'd like to sign up for:");
+        List<Competition> competitions = repo.GetAllCompetitions();  // this will only display competitions the gymnast is NOT already enrolled in
+        foreach (Competition competition in competitions)
+        {
+            compIndex++; // add 1 to the index, so it starts with 1(instead of 0 as defined above). Eeach time the loop goes through it will increment
+            Console.WriteLine($"[{compIndex}] {competition.CompetitionName}"); // right now just printing the index and the competitionName. You can add more.
+        }
+        int compSelection = int.Parse(Console.ReadLine()) - 1;
+        repo.Register(competitions[compSelection], gymnast);
+    }
     private static int ValidateCmd(int cmd, int maxOption)
     {
         while (cmd < 0 || cmd > maxOption)
@@ -121,7 +198,6 @@ class Presentation
             System.Console.WriteLine("Invalid Command - Please Enter a command 1-" + maxOption + "; or 0 to Quit");
             cmd = int.Parse(Console.ReadLine() ?? "0");
         }
-
         //if input was already valid - it skips the if statement and just returns the value.
         return cmd;
     }

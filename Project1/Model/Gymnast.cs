@@ -1,4 +1,4 @@
-class Gymnast
+public class Gymnast
 {
     public string Fname { get; set; }
     public string Lname { get; set; }
@@ -7,14 +7,14 @@ class Gymnast
     public Guid GymnastId { get; set; }
 
 
-        public Gymnast()
+    public Gymnast()
     {
         Fname = "";
         Lname = "";
         DOB = DateTime.MinValue;
         Username = "";
     }
-        public Gymnast(string username, string fname, string lname, DateTime dob)
+    public Gymnast(string username, string fname, string lname, DateTime dob)
     {
         Username = username;
         Fname = fname;
@@ -22,7 +22,15 @@ class Gymnast
         DOB = dob;
         GymnastId = Guid.NewGuid();
     }
-        public override string ToString()
+    public Gymnast(Guid gymnastid, string username, string fname, string lname, DateTime dob)
+    {
+        Username = username;
+        Fname = fname;
+        Lname = lname;
+        DOB = dob;
+        GymnastId = gymnastid;
+    }
+    public override string ToString()
     {
         return "{fname:" + Fname
         + ",lname:" + Lname

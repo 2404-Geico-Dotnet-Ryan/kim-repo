@@ -1,33 +1,37 @@
-class Competition
+
+public class Competition
 {
     public string CompetitionName { get; set; }
-    public long CompetitionDates { get; set; }
+    public DateTime CompetitionStartDate { get; set; }
+    public DateTime CompetitionEndDate { get; set; }
     public string Location { get; set; }
-    public double Score { get; set; }
-    public int CompetitionId { get; set; }
-    public int GymnastId { get; set; }
+    public Guid CompetitionId { get; set; }
 
-            public Competition()
+    public Competition()
     {
         CompetitionName = "";
         Location = "";
+        CompetitionStartDate = DateTime.MinValue;
+        CompetitionEndDate = DateTime.MinValue;
     }
-        public Competition(string competitionName, long competitionDates, string location, double score, int competitionId, int gymnastId)
+    public Competition(string competitionName, DateTime competitionStartDate, DateTime competitionEndDate, string location)
     {
         CompetitionName = competitionName;
-        CompetitionDates = competitionDates;
+        CompetitionStartDate = competitionStartDate;
+        CompetitionEndDate = competitionEndDate;
         Location = location;
-        Score = score;
-        CompetitionId = competitionId;
-        GymnastId = gymnastId;
+        CompetitionId = Guid.NewGuid();
     }
-        public override string ToString()
+    public override string ToString()
     {
-        return "{competitionName:" + CompetitionName
-        + ",CompetitionDates:" + CompetitionDates
-        + ",location:" + Location
-        + ",score:" + Score
-        + ",competitionId:" + CompetitionId
-        + ",gymnastId:" + GymnastId + "}";
+        return $"competitionName:  {CompetitionName}\nCompetitionStartDate:  {CompetitionStartDate}\nCompetitionEndDate:  {CompetitionEndDate}\nlocation:  {Location}\ncompetitionId:  {CompetitionId}\n------------------------------------------";
+    }
+        public Competition(Guid competitionid, string competitionName, DateTime competitionStartDate, DateTime competitionEndDate, string location)
+    {
+        CompetitionName = competitionName;
+        CompetitionStartDate = competitionStartDate;
+        CompetitionEndDate = competitionEndDate;
+        Location = location;
+        CompetitionId = competitionid;
     }
 }

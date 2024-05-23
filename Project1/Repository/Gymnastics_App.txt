@@ -1,0 +1,1 @@
+Data Source=GEIPW05WYDD;Initial Catalog=Gymnastics_App;Integrated Security=False;User Id=sa;Password=password;MultipleActiveResultSets=True;TrustServerCertificate=True;
